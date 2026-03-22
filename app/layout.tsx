@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import ToastProvider from "./components/ToastProvider";
+import ThemeInitializer from "./components/ThemeInitializer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Quản Lý Công Việc",
-  description: "Ứng dụng quản lý công việc theo phong cách Notion",
+  title: "Task Manager - Quản Lý Công Việc",
+  description: "Modern task management application - Ứng dụng quản lý công việc hiện đại",
 };
 
 export default function RootLayout({
@@ -23,10 +25,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <ThemeInitializer />
+        <ToastProvider />
         {children}
       </body>
     </html>
