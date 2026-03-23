@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { Task, Column, User, Language } from "../types";
+import { Task, Column, User, Language, TaskStatus } from "../types";
 
 interface AppState {
   // User state
@@ -32,6 +32,10 @@ interface AppState {
   // Search state
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  
+  // Status filter state
+  statusFilter: TaskStatus | null;
+  setStatusFilter: (status: TaskStatus | null) => void;
 }
 
 const initialColumns: Column[] = [
@@ -189,6 +193,10 @@ export const useStore = create<AppState>()(
       // Search state
       searchQuery: "",
       setSearchQuery: (query) => set({ searchQuery: query }),
+      
+      // Status filter state
+      statusFilter: null,
+      setStatusFilter: (status) => set({ statusFilter: status }),
     }),
     {
       name: "task-manager-storage",

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Task, Language } from "../types";
+import ProgressBar from "./ProgressBar";
 
 // Simple i18n translations
 const translations = {
@@ -62,7 +63,7 @@ export default function TaskCard({
       {...attributes}
       {...listeners}
       onClick={() => onEdit(task)}
-      className="bg-white dark:bg-[#3f3f3f] rounded-[6px] p-3 shadow-sm border border-[#e0e0e0] dark:border-[#4f4f4f] cursor-pointer hover:shadow-md transition-all relative group"
+      className="glass-card rounded-lg p-4 cursor-pointer hover:scale-[1.02] hover:-translate-y-0.5 transition-all duration-200 relative group"
     >
       {/* Favorite Star Icon */}
       <button
@@ -70,7 +71,7 @@ export default function TaskCard({
           e.stopPropagation();
           onToggleFavorite(task.id);
         }}
-        className="absolute top-2 right-2 p-1 hover:scale-110 transition-transform z-10"
+        className="absolute top-2 right-2 p-1 hover:scale-110 transition-transform duration-200 active:scale-95 z-10"
         title={task.isFavorite ? t.removeFromFavorites : t.addToFavorites}
       >
         <svg
@@ -87,7 +88,7 @@ export default function TaskCard({
       </button>
 
       {getTag() && (
-        <span className="inline-block px-2 py-0.5 bg-[#f7f6f3] dark:bg-[#4f4f4f] text-[12px] text-[#9b9a97] rounded-[3px] mb-2">
+        <span className="inline-block px-2 py-0.5 bg-[#f7f6f3] dark:bg-[#4f4f4f] text-[12px] text-[#9b9a97] rounded-[3px] mb-2 transition-colors duration-200 hover:bg-[#eaeaea] dark:hover:bg-[#5f5f5f]">
           {getTag()}
         </span>
       )}
@@ -140,16 +141,7 @@ export default function TaskCard({
       {/* Progress Bar */}
       {task.progress > 0 && (
         <div className="mt-2">
-          <div className="flex items-center justify-between text-[10px] text-[#9b9a97] mb-1">
-            <span>{t.progress}</span>
-            <span>{task.progress}%</span>
-          </div>
-          <div className="w-full h-1.5 bg-[#e0e0e0] dark:bg-[#4f4f4f] rounded-full overflow-hidden">
-            <div
-              className="h-full bg-[#2383E2] rounded-full transition-all duration-300"
-              style={{ width: `${task.progress}%` }}
-            />
-          </div>
+          <ProgressBar progress={task.progress} label={t.progress} showLabel size="sm" />
         </div>
       )}
 

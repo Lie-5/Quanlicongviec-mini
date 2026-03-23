@@ -22,6 +22,10 @@ export interface Task {
   priority: Priority;
   status: TaskStatus;
   dueDate?: string;
+  startDate?: string;
+  endDate?: string;
+  startTime?: string;
+  endTime?: string;
   assignee?: string;
   isFavorite: boolean;
   isPublic: boolean;
@@ -93,6 +97,9 @@ export interface Translation {
   statusInProgress: string;
   statusReview: string;
   statusDone: string;
+  
+  // Progress
+  progress: string;
   
   // Settings
   appearance: string;

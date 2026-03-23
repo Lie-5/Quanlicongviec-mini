@@ -80,8 +80,14 @@ export default function TaskModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-[#2f2f2f] rounded-lg shadow-xl w-full max-w-[600px] max-h-[90vh] overflow-y-auto">
+    <div 
+      className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 animate-fadeIn backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div 
+        className="glass-light rounded-2xl shadow-2xl w-full max-w-[600px] max-h-[90vh] overflow-y-auto animate-scaleIn"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="p-4 border-b border-[#e0e0e0] dark:border-[#3f3f3f] flex items-center justify-between sticky top-0 bg-white dark:bg-[#2f2f2f]">
           <h3 className="font-medium text-[#37352f] dark:text-[#e0e0e0]">
             {task ? t.edit : t.addTask}
@@ -94,7 +100,7 @@ export default function TaskModal({
             />
             <button
               onClick={onClose}
-              className="text-[#9b9a97] hover:text-[#37352f] dark:hover:text-[#e0e0e0]"
+              className="text-[#9b9a97] hover:text-[#37352f] dark:hover:text-[#e0e0e0] transition-all duration-200 hover:rotate-90"
             >
               ✕
             </button>
@@ -222,7 +228,7 @@ export default function TaskModal({
                   onDelete(task.id);
                   onClose();
                 }}
-                className="px-4 py-2 text-[14px] text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-[4px]"
+                className="px-4 py-2 text-[14px] text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-[4px] transition-all duration-200 active:scale-95"
               >
                 {t.delete}
               </button>
@@ -233,13 +239,13 @@ export default function TaskModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-[14px] text-[#9b9a97] hover:bg-[#f7f6f3] dark:hover:bg-[#3f3f3f] rounded-[4px]"
+                className="px-4 py-2 text-[14px] text-[#9b9a97] hover:bg-[#f7f6f3] dark:hover:bg-[#3f3f3f] rounded-[4px] transition-all duration-200 hover:scale-105 active:scale-95"
               >
                 {t.cancel}
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 text-[14px] bg-[#2383E2] text-white rounded-[4px] hover:bg-[#1a6fc4]"
+                className="px-4 py-2 text-[14px] bg-[#2383E2] text-white rounded-[4px] hover:bg-[#1a6fc4] transition-all duration-200 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
               >
                 {t.save}
               </button>

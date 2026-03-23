@@ -62,6 +62,7 @@ export const translations: Record<Language, Translation> = {
     loginSuccess: "Đăng nhập thành công!",
     logoutSuccess: "Đăng xuất thành công!",
     errorOccurred: "Đã xảy ra lỗi!",
+    progress: "Tiến độ",
   },
   en: {
     workspace: "Workspace",
@@ -124,6 +125,7 @@ export const translations: Record<Language, Translation> = {
     loginSuccess: "Login successful!",
     logoutSuccess: "Logout successful!",
     errorOccurred: "An error occurred!",
+    progress: "Progress",
   },
   zh: {
     workspace: "工作空间",
@@ -186,6 +188,7 @@ export const translations: Record<Language, Translation> = {
     loginSuccess: "登录成功！",
     logoutSuccess: "退出登录成功！",
     errorOccurred: "发生错误！",
+    progress: "进度",
   },
   hi: {
     workspace: "कार्यक्षेत्र",
@@ -248,6 +251,7 @@ export const translations: Record<Language, Translation> = {
     loginSuccess: "साइन इन सफल!",
     logoutSuccess: "साइन आउट सफल!",
     errorOccurred: "एक त्रुटि हुई!",
+    progress: "प्रगति",
   },
   ja: {
     workspace: "ワークスペース",
@@ -310,6 +314,7 @@ export const translations: Record<Language, Translation> = {
     loginSuccess: "サインイン成功！",
     logoutSuccess: "サインアウト成功！",
     errorOccurred: "エラーが発生しました！",
+    progress: "進捗",
   },
   fr: {
     workspace: "Espace de travail",
@@ -372,6 +377,7 @@ export const translations: Record<Language, Translation> = {
     loginSuccess: "Connexion réussie！",
     logoutSuccess: "Déconnexion réussie！",
     errorOccurred: "Une erreur s'est produite！",
+    progress: "Progression",
   },
 };
 

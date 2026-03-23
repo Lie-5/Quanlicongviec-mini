@@ -11,6 +11,7 @@ export const useTasks = () => {
     deleteTask,
     moveTask,
     searchQuery,
+    statusFilter,
     language,
   } = useStore();
 
@@ -62,6 +63,9 @@ export const useTasks = () => {
 
     columns.forEach((col) => {
       col.tasks.forEach((task) => {
+        // Apply status filter if set
+        if (statusFilter && task.status !== statusFilter) return;
+        
         const title = (language === "vi" ? task.title : task.titleEn).toLowerCase();
         const description = (language === "vi" ? task.description : task.descriptionEn)?.toLowerCase() || "";
         const tag = (language === "vi" ? task.tag : task.tagEn)?.toLowerCase() || "";
@@ -73,6 +77,16 @@ export const useTasks = () => {
     });
 
     return results;
+  };
+
+  // Get columns with filtered tasks (for board display with status filter)
+  const getFilteredColumns = () => {
+    if (!statusFilter) return columns;
+    
+    return columns.map((col) => ({
+      ...col,
+      tasks: col.tasks.filter((task) => task.status === statusFilter),
+    }));
   };
 
   const getTaskById = (taskId: string): { task: Task; columnId: string } | null => {
@@ -152,6 +166,7 @@ export const useTasks = () => {
     getFavoriteTasks,
     getRecentTasks,
     getFilteredTasks,
+    getFilteredColumns,
     getTaskById,
     getTasksByColumn,
     getAllTasks,

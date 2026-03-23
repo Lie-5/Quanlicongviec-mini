@@ -14,14 +14,14 @@ import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { useStore } from "../store/useStore";
 import { useTasks } from "../hooks/useTasks";
 import { getTranslation } from "../lib/translations";
-import { Task } from "../types";
+import { Task, TaskStatus } from "../types";
 import TaskCard from "./TaskCard";
 import TaskModal from "./TaskModal";
 import EmptyState from "./EmptyState";
 
 export default function TaskBoardNew() {
-  const { language, searchQuery } = useStore();
-  const { columns, createTask, editTask, removeTask, changeTaskStatus, toggleFavorite, viewTask, getFilteredTasks } = useTasks();
+  const { language, searchQuery, statusFilter, setStatusFilter } = useStore();
+  const { columns, createTask, editTask, removeTask, changeTaskStatus, toggleFavorite, viewTask, getFilteredTasks, getFilteredColumns } = useTasks();
   const t = getTranslation(language);
 
   const [activeTask, setActiveTask] = useState<Task | null>(null);
@@ -104,14 +104,20 @@ export default function TaskBoardNew() {
 
   const filteredTasks = getFilteredTasks();
   const hasAnyTasks = columns.some((col) => col.tasks.length > 0);
+  
+  // Use filtered columns when status filter is active
+  const displayColumns = statusFilter ? getFilteredColumns() : columns;
 
   return (
-    <div className="pt-[45px] min-h-screen bg-white dark:bg-[#191919] transition-colors">
+    <div className="pt-[45px] min-h-screen transition-colors">
       {/* Search Results Overlay */}
       {searchQuery && (
-        <div className="fixed inset-0 bg-black/30 z-40" onClick={() => useStore.getState().setSearchQuery("")}>
+        <div 
+          className="fixed inset-0 bg-black/40 z-40 animate-fadeIn backdrop-blur-sm" 
+          onClick={() => useStore.getState().setSearchQuery("")}
+        >
           <div
-            className="mt-[45px] mx-auto max-w-[600px] bg-white dark:bg-[#2f2f2f] rounded-lg shadow-xl max-h-[70vh] overflow-y-auto"
+            className="mt-[45px] mx-auto max-w-[600px] glass-light rounded-xl shadow-2xl max-h-[70vh] overflow-y-auto animate-scaleIn"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-4 border-b border-[#e0e0e0] dark:border-[#3f3f3f]">
@@ -172,13 +178,50 @@ export default function TaskBoardNew() {
       />
 
       {/* Page Header */}
-      <div className="px-8 py-6 border-b border-[#e0e0e0] dark:border-[#2f2f2f]">
+      <div className="px-8 py-6 glass border-b border-[#e0e0e0]/30 dark:border-[#ffffff/10]">
         <div className="flex items-center gap-2 mb-2">
           <span className="text-[14px] text-[#9b9a97]">{t.workspace}</span>
           <span className="text-[14px] text-[#9b9a97]">/</span>
           <span className="text-[14px] text-[#37352f] dark:text-[#e0e0e0] font-medium">{t.board}</span>
         </div>
         <h1 className="text-[28px] font-bold text-[#37352f] dark:text-[#e0e0e0]">{t.taskBoard}</h1>
+      </div>
+
+      {/* Status Filter */}
+      <div className="px-8 py-4 glass border-b border-[#e0e0e0]/30 dark:border-[#ffffff/10] flex items-center gap-2">
+        <span className="text-[14px] text-[#9b9a97] mr-2">{t.status}:</span>
+        <button
+          onClick={() => setStatusFilter(null)}
+          className={`px-3 py-1.5 text-[13px] rounded-md transition-all duration-200 hover:scale-105 active:scale-95 ${
+            statusFilter === null
+              ? "bg-[#37352f] dark:bg-[#e0e0e0] text-white dark:text-[#37352f] shadow-md"
+              : "bg-[#f7f6f3] dark:bg-[#2f2f2f] text-[#37352f] dark:text-[#e0e0e0] hover:bg-[#eaeaea] dark:hover:bg-[#3f3f3f]"
+          }`}
+        >
+          All
+        </button>
+        {[  
+          { id: "todo", label: t.statusTodo, color: "#9b9a97" },
+          { id: "in-progress", label: t.statusInProgress, color: "#E16737" },
+          { id: "review", label: t.statusReview, color: "#6988FF" },
+          { id: "done", label: t.statusDone, color: "#0F7B6D" },
+        ].map((status) => (
+          <button
+            key={status.id}
+            onClick={() => setStatusFilter(status.id as TaskStatus)}
+            className={`px-3 py-1.5 text-[13px] rounded-md transition-all duration-200 flex items-center gap-1.5 hover:scale-105 active:scale-95 ${
+              statusFilter === status.id
+                ? "bg-[#37352f] dark:bg-[#e0e0e0] text-white dark:text-[#37352f] shadow-md"
+                : "bg-[#f7f6f3] dark:bg-[#2f2f2f] text-[#37352f] dark:text-[#e0e0e0] hover:bg-[#eaeaea] dark:hover:bg-[#3f3f3f]"
+            }`}
+          >
+            <span
+              className="w-2 h-2 rounded-full"
+              style={{ backgroundColor: status.color }}
+            />
+            {status.label}
+          </button>
+        ))}
       </div>
 
       {/* Board */}
@@ -188,10 +231,10 @@ export default function TaskBoardNew() {
         ) : (
           <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
             <div className="flex gap-4 overflow-x-auto pb-4">
-            {columns.map((column) => (
+            {displayColumns.map((column) => (
               <div
                 key={column.id}
-                className="flex-shrink-0 w-[280px] bg-[#f7f6f3] dark:bg-[#2f2f2f] rounded-[8px] p-3"
+                className="flex-shrink-0 w-[300px] glass rounded-xl p-4"
               >
                 {/* Column Header */}
                 <div className="flex items-center justify-between mb-3 px-1">
@@ -204,7 +247,7 @@ export default function TaskBoardNew() {
                   </div>
                   <button
                     onClick={() => handleAddTask(column.id)}
-                    className="text-[#9b9a97] hover:text-[#37352f] dark:hover:text-[#e0e0e0] text-[18px]"
+                    className="text-[#9b9a97] hover:text-[#37352f] dark:hover:text-[#e0e0e0] text-[18px] transition-all duration-200 hover:scale-110 active:scale-95"
                   >
                     +
                   </button>

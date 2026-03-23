@@ -64,67 +64,101 @@ export default function EmptyState({ language, onCreateTask }: EmptyStateProps) 
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] p-8">
-      <div className="relative mb-8">
-        <div className="w-32 h-32 bg-gradient-to-br from-[#2383E2]/20 to-[#1a6fc4]/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+      {/* Animated Illustration */}
+      <div className="relative mb-8 group">
+        {/* Floating orbs animation */}
+        <div className="absolute inset-0 w-40 h-40 mx-auto bg-gradient-to-r from-blue-400/30 to-indigo-500/30 rounded-full blur-2xl group-hover:blur-3xl transition-all duration-500 animate-pulse" />
+        
+        {/* Main icon container */}
+        <div className="relative w-36 h-36 bg-gradient-to-br from-blue-500/20 via-indigo-500/15 to-purple-500/20 rounded-3xl flex items-center justify-center backdrop-blur-sm border border-white/20 dark:border-white/10 shadow-2xl">
           <svg
-            width="64"
-            height="64"
+            width="72"
+            height="72"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
             strokeWidth="1.5"
-            className="text-[#2383E2]"
+            className="text-blue-500 dark:text-blue-400 drop-shadow-lg"
           >
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-            <line x1="9" y1="9" x2="15" y2="9" />
-            <line x1="9" y1="15" x2="15" y2="15" />
+            {/* Task list icon */}
+            <rect x="3" y="4" width="18" height="16" rx="2" className="stroke-blue-300/50" />
+            <line x1="3" y1="10" x2="21" y2="10" className="stroke-blue-300/30" />
+            <line x1="3" y1="15" x2="15" y2="15" className="stroke-blue-300/30" />
+            <circle cx="7" cy="7" r="1.5" fill="currentColor" className="text-blue-500" />
+            <circle cx="7" cy="12" r="1.5" fill="currentColor" className="text-blue-400/60" />
+            {/* Checkmark */}
+            <path d="M16 6l2.5 2.5L21 2" className="stroke-emerald-500" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
-        <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-[#E16737] to-[#d15527] rounded-full flex items-center justify-center shadow-lg">
-          <span className="text-white text-lg">+</span>
+        
+        {/* Floating add button */}
+        <div className="absolute -top-2 -right-2 w-10 h-10 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/30 animate-bounce">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
         </div>
+        
+        {/* Decorative elements */}
+        <div className="absolute -bottom-3 -left-3 w-6 h-6 bg-yellow-400/80 rounded-full shadow-lg shadow-yellow-400/30 animate-ping" />
+        <div className="absolute top-1/2 -right-4 w-4 h-4 bg-purple-400/60 rounded-full" />
       </div>
 
-      <h2 className="text-[24px] font-bold text-[#37352f] dark:text-[#e0e0e0] mb-2">
+      {/* Message */}
+      <h2 className="text-[28px] font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent mb-3">
         {t.noTasks}
       </h2>
-      <p className="text-[14px] text-[#9b9a97] mb-6 text-center max-w-[400px]">
+      <p className="text-[15px] text-slate-500 dark:text-slate-400 mb-8 text-center max-w-[420px] leading-relaxed">
         {t.description}
       </p>
 
+      {/* CTA Button */}
       <button
         onClick={onCreateTask}
-        className="px-6 py-3 bg-gradient-to-r from-[#2383E2] to-[#1a6fc4] text-white rounded-[8px] hover:shadow-lg hover:shadow-[#2383E2]/30 transition-all font-medium flex items-center gap-2"
+        className="group relative px-8 py-4 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/30 hover:scale-105 active:scale-95"
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <line x1="12" y1="5" x2="12" y2="19" />
-          <line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
-        {t.createFirst}
+        {/* Button shine effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+        
+        <span className="relative flex items-center gap-2 font-medium">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover:rotate-90 transition-transform duration-300">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          {t.createFirst}
+        </span>
       </button>
 
-      <div className="mt-12 grid grid-cols-3 gap-6 max-w-[600px]">
-        <div className="text-center">
-          <div className="w-12 h-12 bg-[#f7f6f3] dark:bg-[#2f2f2f] rounded-[8px] flex items-center justify-center mx-auto mb-2">
-            <span className="text-[24px]">📝</span>
+      {/* Feature cards */}
+      <div className="mt-16 grid grid-cols-3 gap-6 max-w-[700px]">
+        <div className="glass-card rounded-xl p-5 text-center hover:scale-105 transition-transform duration-200">
+          <div className="w-14 h-14 mx-auto mb-3 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-xl flex items-center justify-center">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-blue-500">
+              <path d="M12 5v14M5 12h14" strokeLinecap="round" />
+            </svg>
           </div>
-          <p className="text-[12px] text-[#9b9a97]">
+          <p className="text-[13px] font-medium text-slate-600 dark:text-slate-300">
             {t.createTasks}
           </p>
         </div>
-        <div className="text-center">
-          <div className="w-12 h-12 bg-[#f7f6f3] dark:bg-[#2f2f2f] rounded-[8px] flex items-center justify-center mx-auto mb-2">
-            <span className="text-[24px]">🎯</span>
+        <div className="glass-card rounded-xl p-5 text-center hover:scale-105 transition-transform duration-200">
+          <div className="w-14 h-14 mx-auto mb-3 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-xl flex items-center justify-center">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-orange-500">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 6v6l4 2" strokeLinecap="round" />
+            </svg>
           </div>
-          <p className="text-[12px] text-[#9b9a97]">
+          <p className="text-[13px] font-medium text-slate-600 dark:text-slate-300">
             {t.setPriorities}
           </p>
         </div>
-        <div className="text-center">
-          <div className="w-12 h-12 bg-[#f7f6f3] dark:bg-[#2f2f2f] rounded-[8px] flex items-center justify-center mx-auto mb-2">
-            <span className="text-[24px]">✅</span>
+        <div className="glass-card rounded-xl p-5 text-center hover:scale-105 transition-transform duration-200">
+          <div className="w-14 h-14 mx-auto mb-3 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-xl flex items-center justify-center">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-emerald-500">
+              <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </div>
-          <p className="text-[12px] text-[#9b9a97]">
+          <p className="text-[13px] font-medium text-slate-600 dark:text-slate-300">
             {t.complete}
           </p>
         </div>
