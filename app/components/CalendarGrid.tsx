@@ -1,13 +1,17 @@
 "use client";
 
 import { Task, Language } from "../types";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
+import CalendarTaskBar from "./CalendarTaskBar";
+import { HolidayBadge, useHolidays, VIETNAM_HOLIDAYS } from "./HolidayBadge";
 
 interface CalendarGridProps {
   tasks: Task[];
   language: Language;
   onDateClick: (date: Date) => void;
   onTaskClick: (task: Task) => void;
+  onRangeSelect?: (start: Date, end: Date) => void;
+  enableRangeSelection?: boolean;
 }
 
 // Calendar translations - synced with app language
@@ -29,28 +33,6 @@ const MONTHS: Record<Language, string[]> = {
   fr: ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"],
 };
 
-// Priority colors with gradient support
-const PRIORITY_COLORS = {
-  high: {
-    bg: "bg-gradient-to-r from-red-500 to-red-600",
-    border: "border-l-red-500",
-    text: "text-red-600 dark:text-red-400",
-  },
-  medium: {
-    bg: "bg-gradient-to-r from-yellow-500 to-yellow-600",
-    border: "border-l-yellow-500",
-    text: "text-yellow-600 dark:text-yellow-400",
-  },
-  low: {
-    bg: "bg-gradient-to-r from-green-500 to-green-600",
-    border: "border-l-green-500",
-    text: "text-green-600 dark:text-green-400",
-  },
-};
-
-// Default gradient for tasks without specific priority coloring
-const DEFAULT_GRADIENT = "bg-gradient-to-r from-blue-500 to-purple-600";
-
 // Helper to get current year range
 const getYearRange = () => {
   const currentYear = new Date().getFullYear();
@@ -66,15 +48,26 @@ export default function CalendarGrid({
   language,
   onDateClick,
   onTaskClick,
+  onRangeSelect,
+  enableRangeSelection = false,
 }: CalendarGridProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isMonthDropdownOpen, setIsMonthDropdownOpen] = useState(false);
   const [isYearDropdownOpen, setIsYearDropdownOpen] = useState(false);
   
+  // Range selection state
+  const [isSelectingRange, setIsSelectingRange] = useState(false);
+  const [rangeStart, setRangeStart] = useState<Date | null>(null);
+  const [rangeEnd, setRangeEnd] = useState<Date | null>(null);
+  const [hoverDate, setHoverDate] = useState<Date | null>(null);
+
   const weekdays = WEEKDAYS[language] || WEEKDAYS.en;
   const months = MONTHS[language] || MONTHS.en;
   const yearRange = useMemo(() => getYearRange(), []);
+
+  // Holiday hook
+  const { getHolidayForDate, isHoliday } = useHolidays(language, "vn");
 
   const today = useMemo(() => {
     const now = new Date();
@@ -201,6 +194,31 @@ export default function CalendarGrid({
     return formatDateKey(date) === formatDateKey(selectedDate);
   };
 
+  // Check if date is in selected range
+  const isInRange = useCallback((date: Date) => {
+    if (!rangeStart || !rangeEnd) return false;
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    const start = new Date(Math.min(rangeStart.getTime(), rangeEnd.getTime()));
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(Math.max(rangeStart.getTime(), rangeEnd.getTime()));
+    end.setHours(0, 0, 0, 0);
+    return d >= start && d <= end;
+  }, [rangeStart, rangeEnd]);
+
+  // Check if date is start or end of range
+  const isRangeStart = useCallback((date: Date) => {
+    if (!rangeStart || !rangeEnd) return false;
+    const start = rangeStart < rangeEnd ? rangeStart : rangeEnd;
+    return formatDateKey(date) === formatDateKey(start);
+  }, [rangeStart, rangeEnd]);
+
+  const isRangeEnd = useCallback((date: Date) => {
+    if (!rangeStart || !rangeEnd) return false;
+    const end = rangeStart < rangeEnd ? rangeEnd : rangeStart;
+    return formatDateKey(date) === formatDateKey(end);
+  }, [rangeStart, rangeEnd]);
+
   const isDeadlineDay = (task: Task, date: Date) => {
     const dueDate = task.dueDate || task.endDate;
     if (!dueDate) return false;
@@ -233,9 +251,43 @@ export default function CalendarGrid({
     setIsYearDropdownOpen(false);
   };
 
+  // Handle date click with range selection support
   const handleDateClick = (date: Date) => {
-    setSelectedDate(date);
-    onDateClick(date);
+    if (enableRangeSelection) {
+      if (!isSelectingRange) {
+        // Start range selection
+        setIsSelectingRange(true);
+        setRangeStart(date);
+        setRangeEnd(null);
+      } else {
+        // Complete range selection
+        setRangeEnd(date);
+        setIsSelectingRange(false);
+        if (onRangeSelect && rangeStart) {
+          const start = date < rangeStart ? date : rangeStart;
+          const end = date < rangeStart ? rangeStart : date;
+          onRangeSelect(start, end);
+        }
+      }
+    } else {
+      setSelectedDate(date);
+      onDateClick(date);
+    }
+  };
+
+  // Handle mouse enter for range preview
+  const handleMouseEnter = (date: Date) => {
+    if (isSelectingRange && rangeStart) {
+      setHoverDate(date);
+    }
+  };
+
+  // Clear range selection
+  const clearRangeSelection = () => {
+    setIsSelectingRange(false);
+    setRangeStart(null);
+    setRangeEnd(null);
+    setHoverDate(null);
   };
 
   const handleTaskClick = (e: React.MouseEvent, task: Task) => {
@@ -243,7 +295,7 @@ export default function CalendarGrid({
     onTaskClick(task);
   };
 
-  // Get display title based on language (no language labels)
+  // Get display title based on language
   const getTaskTitle = (task: Task) => {
     return language === "vi" && task.title ? task.title : task.titleEn;
   };
@@ -253,6 +305,37 @@ export default function CalendarGrid({
     if (!time) return null;
     return time;
   };
+
+  // Calculate display range for hover preview
+  const displayRangeStart = isSelectingRange && hoverDate && rangeStart
+    ? (rangeStart < hoverDate ? rangeStart : hoverDate)
+    : rangeStart;
+  const displayRangeEnd = isSelectingRange && hoverDate && rangeStart
+    ? (rangeStart < hoverDate ? hoverDate : rangeStart)
+    : rangeEnd;
+
+  const isInDisplayRange = useCallback((date: Date) => {
+    if (!displayRangeStart || !displayRangeEnd) return false;
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    const start = new Date(Math.min(displayRangeStart.getTime(), displayRangeEnd.getTime()));
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(Math.max(displayRangeStart.getTime(), displayRangeEnd.getTime()));
+    end.setHours(0, 0, 0, 0);
+    return d >= start && d <= end;
+  }, [displayRangeStart, displayRangeEnd]);
+
+  const isDisplayRangeStart = useCallback((date: Date) => {
+    if (!displayRangeStart || !displayRangeEnd) return false;
+    const start = displayRangeStart < displayRangeEnd ? displayRangeStart : displayRangeEnd;
+    return formatDateKey(date) === formatDateKey(start);
+  }, [displayRangeStart, displayRangeEnd]);
+
+  const isDisplayRangeEnd = useCallback((date: Date) => {
+    if (!displayRangeStart || !displayRangeEnd) return false;
+    const end = displayRangeStart < displayRangeEnd ? displayRangeEnd : displayRangeStart;
+    return formatDateKey(date) === formatDateKey(end);
+  }, [displayRangeStart, displayRangeEnd]);
 
   return (
     <div className="flex flex-col h-full">
@@ -356,13 +439,32 @@ export default function CalendarGrid({
           </div>
         </div>
 
-        {/* Today Button */}
-        <button
-          onClick={handleToday}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
-        >
-          {language === "vi" ? "Hôm nay" : language === "zh" ? "今天" : language === "ja" ? "今日" : language === "hi" ? "आज" : language === "fr" ? "Aujourd'hui" : "Today"}
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Range selection indicator */}
+          {enableRangeSelection && (
+            <button
+              onClick={clearRangeSelection}
+              className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all ${
+                isSelectingRange 
+                  ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400" 
+                  : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+              }`}
+            >
+              {isSelectingRange 
+                ? (language === "vi" ? "Đang chọn..." : "Selecting...") 
+                : (language === "vi" ? "Chọn khoảng" : "Select range")
+              }
+            </button>
+          )}
+          
+          {/* Today Button */}
+          <button
+            onClick={handleToday}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
+          >
+            {language === "vi" ? "Hôm nay" : language === "zh" ? "今天" : language === "ja" ? "今日" : language === "hi" ? "आज" : language === "fr" ? "Aujourd'hui" : "Today"}
+          </button>
+        </div>
       </div>
 
       {/* Weekday Headers */}
@@ -382,16 +484,27 @@ export default function CalendarGrid({
         {calendarDays.map((day, index) => {
           const dayTasks = getTasksForDate(day.date);
           const dateKey = formatDateKey(day.date);
+          const holiday = getHolidayForDate(day.date);
+          const isTodayDate = isToday(day.date);
+          const isSelectedDate = isSelected(day.date);
+          
+          // Range selection states
+          const inRange = isInDisplayRange(day.date);
+          const rangeStartDate = isDisplayRangeStart(day.date);
+          const rangeEndDate = isDisplayRangeEnd(day.date);
           
           return (
             <div
               key={index}
               onClick={() => handleDateClick(day.date)}
+              onMouseEnter={() => handleMouseEnter(day.date)}
               className={`
                 min-h-[120px] p-2 border-b border-r border-slate-200 dark:border-slate-700 cursor-pointer
                 transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-800/50
                 ${!day.isCurrentMonth ? "bg-slate-50/50 dark:bg-slate-900/30" : ""}
-                ${isSelected(day.date) ? "bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-500 ring-inset" : ""}
+                ${isSelectedDate ? "bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-500 ring-inset" : ""}
+                ${inRange && !rangeStartDate && !rangeEndDate ? "bg-yellow-100/50 dark:bg-yellow-900/20" : ""}
+                ${holiday ? "bg-red-50/30 dark:bg-red-900/10" : ""}
               `}
             >
               <div className="flex items-center justify-between mb-2">
@@ -399,19 +512,38 @@ export default function CalendarGrid({
                   className={`
                     text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full
                     transition-all duration-200
-                    ${isToday(day.date) ? "bg-blue-500 text-white shadow-md" : ""}
+                    ${isTodayDate ? "bg-blue-500 text-white shadow-md" : ""}
                     ${day.isCurrentMonth ? "text-slate-700 dark:text-slate-300" : "text-slate-400 dark:text-slate-600"}
-                    ${!isToday(day.date) && "hover:bg-slate-200 dark:hover:bg-slate-700"}
+                    ${!isTodayDate && "hover:bg-slate-200 dark:hover:bg-slate-700"}
+                    ${rangeStartDate || rangeEndDate ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white" : ""}
                   `}
                 >
                   {day.date.getDate()}
                 </span>
-                {dayTasks.length > 0 && (
-                  <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">
-                    {dayTasks.length}
-                  </span>
-                )}
+                <div className="flex items-center gap-1">
+                  {holiday && (
+                    <span className="text-[10px] font-medium text-red-500 dark:text-red-400">
+                      {holiday.name[language] || holiday.name.en}
+                    </span>
+                  )}
+                  {dayTasks.length > 0 && (
+                    <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">
+                      {dayTasks.length}
+                    </span>
+                  )}
+                </div>
               </div>
+              
+              {/* Holiday badge */}
+              {holiday && (
+                <div className="mb-1">
+                  <HolidayBadge 
+                    holiday={holiday} 
+                    language={language} 
+                    variant="compact" 
+                  />
+                </div>
+              )}
               
               {/* Task badges */}
               <div className="space-y-1.5 overflow-hidden">
@@ -420,48 +552,19 @@ export default function CalendarGrid({
                   const isEnd = isTaskEndDay(task, day.date);
                   const isMiddle = isTaskMiddleDay(task, day.date);
                   const isDeadline = isDeadlineDay(task, day.date);
-                  const priorityColor = PRIORITY_COLORS[task.priority];
-                  const hasTime = task.startTime || task.endTime;
                   
                   return (
-                    <div
+                    <CalendarTaskBar
                       key={task.id}
-                      onClick={(e) => handleTaskClick(e, task)}
-                      className={`
-                        relative px-2 py-1.5 text-xs rounded-md truncate cursor-pointer
-                        transition-all duration-200 hover:scale-[1.02] hover:shadow-sm
-                        ${priorityColor.bg} text-white
-                        ${isStart ? "rounded-l-md" : ""}
-                        ${isEnd ? "rounded-r-md" : ""}
-                        ${isMiddle ? "rounded-none" : ""}
-                        ${isDeadline ? "ring-2 ring-white dark:ring-slate-800 ring-offset-1" : ""}
-                        ${isMultiDayTask(task) ? "w-[calc(100%+4px)] -ml-0.5" : ""}
-                      `}
-                    >
-                      {/* Time indicator bar */}
-                      {hasTime && (
-                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-white/30 rounded-l-md" />
-                      )}
-                      
-                      <div className="flex items-center gap-1">
-                        <span className="truncate font-medium">
-                          {getTaskTitle(task)}
-                        </span>
-                      </div>
-                      
-                      {/* Time display */}
-                      {hasTime && (
-                        <div className="text-[10px] opacity-90 mt-0.5 flex items-center gap-1">
-                          {task.startTime && (
-                            <span>{formatTime(task.startTime)}</span>
-                          )}
-                          {task.startTime && task.endTime && <span>-</span>}
-                          {task.endTime && !task.startTime && (
-                            <span>{formatTime(task.endTime)}</span>
-                          )}
-                        </div>
-                      )}
-                    </div>
+                      task={task}
+                      language={language}
+                      isStart={isStart}
+                      isEnd={isEnd}
+                      isMiddle={isMiddle}
+                      isDeadline={isDeadline}
+                      onClick={onTaskClick}
+                      showTime={true}
+                    />
                   );
                 })}
                 {dayTasks.length > 4 && (

@@ -33,6 +33,17 @@ export interface Task {
   lastViewedAt?: string;
   createdAt: string;
   updatedAt: string;
+  // Collaboration system
+  createdBy?: {
+    email: string;
+    name: string;
+    avatar: string;
+  };
+  assignedTo?: Array<{
+    email: string;
+    name: string;
+    avatar: string;
+  }>;
 }
 
 export interface Column {

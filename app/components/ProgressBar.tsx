@@ -5,19 +5,26 @@ interface ProgressBarProps {
   showLabel?: boolean;
   label?: string;
   size?: "sm" | "md" | "lg";
+  customColor?: string;
 }
 
 export default function ProgressBar({ 
   progress, 
   showLabel = false, 
   label = "Progress",
-  size = "sm" 
+  size = "sm",
+  customColor 
 }: ProgressBarProps) {
   // Clamp progress between 0 and 100
   const clampedProgress = Math.max(0, Math.min(100, progress));
   
-  // Determine color based on progress value
+  // Determine color based on progress value or custom color
   const getProgressColor = (value: number) => {
+    // If custom color is provided, use it
+    if (customColor) {
+      return customColor;
+    }
+    // Default gradient based on progress
     if (value < 33) return "from-red-400 to-orange-400";
     if (value < 66) return "from-orange-400 to-yellow-400";
     return "from-emerald-400 to-teal-400";
@@ -39,15 +46,25 @@ export default function ProgressBar({
         </div>
       )}
       <div className={`w-full ${sizeClasses[size]} bg-slate-200 dark:bg-slate-700/50 rounded-full overflow-hidden`}>
-        <div
-          className={`h-full rounded-full bg-gradient-to-r ${getProgressColor(clampedProgress)} transition-all duration-500 ease-out`}
-          style={{ width: `${clampedProgress}%` }}
-        >
-          {/* Shimmer effect */}
-          <div className="h-full w-full relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
+        {customColor ? (
+          <div
+            className="h-full rounded-full transition-all duration-500 ease-out"
+            style={{ 
+              width: `${clampedProgress}%`,
+              backgroundColor: customColor 
+            }}
+          />
+        ) : (
+          <div
+            className={`h-full rounded-full bg-gradient-to-r ${getProgressColor(clampedProgress)} transition-all duration-500 ease-out`}
+            style={{ width: `${clampedProgress}%` }}
+          >
+            {/* Shimmer effect */}
+            <div className="h-full w-full relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

@@ -1,13 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Task, Language, Priority } from "../types";
 import { getTranslation } from "../lib/translations";
 import ProgressBar from "./ProgressBar";
+import DateRangePicker from "./DateRangePicker";
 
 interface CalendarModalProps {
   task: Task | null;
   selectedDate: Date | null;
+  rangeStart?: Date | null;
+  rangeEnd?: Date | null;
   language: Language;
   isOpen: boolean;
   onSave: (taskData: Partial<Task>) => void;
@@ -24,6 +27,8 @@ const PRIORITY_COLORS = {
 export default function CalendarModal({
   task,
   selectedDate,
+  rangeStart,
+  rangeEnd,
   language,
   isOpen,
   onSave,
@@ -31,6 +36,7 @@ export default function CalendarModal({
   onClose,
 }: CalendarModalProps) {
   const t = getTranslation(language);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   
   const formatDateForInput = (date: Date) => {
     return date.toISOString().split("T")[0];
@@ -40,8 +46,21 @@ export default function CalendarModal({
     return time || "09:00";
   };
 
-  const getInitialFormData = () => {
-    const dateStr = selectedDate ? formatDateForInput(selectedDate) : formatDateForInput(new Date());
+  // Compute initial form data based on props
+  const initialFormData = useMemo(() => {
+    let startDateStr: string;
+    let endDateStr: string;
+    
+    if (rangeStart && rangeEnd) {
+      startDateStr = formatDateForInput(rangeStart < rangeEnd ? rangeStart : rangeEnd);
+      endDateStr = formatDateForInput(rangeStart < rangeEnd ? rangeEnd : rangeStart);
+    } else if (selectedDate) {
+      startDateStr = formatDateForInput(selectedDate);
+      endDateStr = formatDateForInput(selectedDate);
+    } else {
+      startDateStr = formatDateForInput(new Date());
+      endDateStr = formatDateForInput(new Date());
+    }
     
     if (task) {
       return {
@@ -50,8 +69,8 @@ export default function CalendarModal({
         description: task.description || "",
         descriptionEn: task.descriptionEn || "",
         priority: task.priority,
-        startDate: task.startDate || task.dueDate || dateStr,
-        endDate: task.endDate || task.dueDate || dateStr,
+        startDate: task.startDate || task.dueDate || startDateStr,
+        endDate: task.endDate || task.dueDate || endDateStr,
         startTime: task.startTime || "09:00",
         endTime: task.endTime || "10:00",
         progress: task.progress || 0,
@@ -66,21 +85,24 @@ export default function CalendarModal({
       description: "",
       descriptionEn: "",
       priority: "medium" as Priority,
-      startDate: dateStr,
-      endDate: dateStr,
+      startDate: startDateStr,
+      endDate: endDateStr,
       startTime: "09:00",
       endTime: "10:00",
       progress: 0,
       tag: "",
       tagEn: "",
     };
-  };
+  }, [task, selectedDate, rangeStart, rangeEnd]);
 
-  const [formData, setFormData] = useState(getInitialFormData());
+  const [formData, setFormData] = useState(initialFormData);
 
+  // Reset form data when modal opens with new initial data
   useEffect(() => {
-    setFormData(getInitialFormData());
-  }, [task?.id, selectedDate]);
+    if (isOpen) {
+      setFormData(initialFormData);
+    }
+  }, [isOpen, initialFormData.startDate, initialFormData.endDate]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,6 +116,20 @@ export default function CalendarModal({
     });
     onClose();
   };
+
+  // Handle range change from DateRangePicker
+  const handleRangeChange = (start: Date | null, end: Date | null) => {
+    if (start && end) {
+      setFormData(prev => ({
+        ...prev,
+        startDate: formatDateForInput(start),
+        endDate: formatDateForInput(end),
+      }));
+    }
+  };
+
+  // Check if it's a multi-day range
+  const isMultiDayRange = formData.startDate !== formData.endDate;
 
   if (!isOpen) return null;
 
@@ -152,22 +188,83 @@ export default function CalendarModal({
             />
           </div>
 
-          {/* Date & Time */}
+          {/* Date Range Section */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                {language === "vi" ? "Ngày" : "Date"}
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowDatePicker(!showDatePicker)}
+                className="text-xs text-blue-500 hover:text-blue-600 dark:text-blue-400"
+              >
+                {showDatePicker 
+                  ? (language === "vi" ? "Ẩn lịch" : "Hide calendar")
+                  : (language === "vi" ? "Chọn từ lịch" : "Pick from calendar")
+                }
+              </button>
+            </div>
+            
+            {/* Date Range Picker (collapsible) */}
+            {showDatePicker && (
+              <div className="mb-4">
+                <DateRangePicker
+                  startDate={formData.startDate ? new Date(formData.startDate) : null}
+                  endDate={formData.endDate ? new Date(formData.endDate) : null}
+                  onRangeChange={handleRangeChange}
+                  language={language}
+                />
+              </div>
+            )}
+
+            {/* Date Inputs */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  {language === "vi" ? "Bắt đầu" : "Start"}
+                </label>
+                <input
+                  type="date"
+                  value={formData.startDate}
+                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  {language === "vi" ? "Kết thúc" : "End"}
+                </label>
+                <input
+                  type="date"
+                  value={formData.endDate}
+                  onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Range indicator */}
+            {isMultiDayRange && (
+              <div className="mt-2 flex items-center gap-2 text-xs text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 px-3 py-2 rounded-lg">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span>
+                  {language === "vi" 
+                    ? `Nhiệm vụ kéo dài ${Math.ceil((new Date(formData.endDate).getTime() - new Date(formData.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1} ngày`
+                    : `Task spans ${Math.ceil((new Date(formData.endDate).getTime() - new Date(formData.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1} days`
+                  }
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Time */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                Start Date
-              </label>
-              <input
-                type="date"
-                value={formData.startDate}
-                onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                Start Time
+                {language === "vi" ? "Giờ bắt đầu" : "Start Time"}
               </label>
               <input
                 type="time"
@@ -176,23 +273,9 @@ export default function CalendarModal({
                 className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
               />
             </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                End Date
-              </label>
-              <input
-                type="date"
-                value={formData.endDate}
-                onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                End Time
+                {language === "vi" ? "Giờ kết thúc" : "End Time"}
               </label>
               <input
                 type="time"

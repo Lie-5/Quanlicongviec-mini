@@ -5,6 +5,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Task, Language } from "../types";
 import ProgressBar from "./ProgressBar";
+import AvatarDisplay from "./AvatarDisplay";
 
 // Simple i18n translations
 const translations = {
@@ -54,6 +55,34 @@ export default function TaskCard({
 
   const getTaskTitle = () => (language === "vi" ? task.title : task.titleEn);
   const getTag = () => (language === "vi" ? task.tag : task.tagEn);
+  
+  // Get progress color based on status and due date
+  const getProgressColor = () => {
+    // Green: completed (progress 100% or status done)
+    if (task.progress === 100 || task.status === "done") {
+      return "#22c55e"; // green-500
+    }
+    
+    // Red: overdue
+    if (task.dueDate) {
+      const due = new Date(task.dueDate);
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      if (due < now) {
+        return "#ef4444"; // red-500
+      }
+    }
+    
+    // Yellow/Orange: in progress
+    if (task.progress > 0) {
+      return "#eab308"; // yellow-500
+    }
+    
+    // Default gray
+    return "#9b9a97";
+  };
+  
+  const progressColor = getProgressColor();
   const t = translations[language] || translations.en;
 
   return (
@@ -141,12 +170,23 @@ export default function TaskCard({
       {/* Progress Bar */}
       {task.progress > 0 && (
         <div className="mt-2">
-          <ProgressBar progress={task.progress} label={t.progress} showLabel size="sm" />
+          <ProgressBar progress={task.progress} label={t.progress} showLabel size="sm" customColor={progressColor} />
         </div>
       )}
 
       <div className="flex items-center justify-between mt-2">
         <div className="flex items-center gap-2">
+          {/* Avatar Display for Assigned Members */}
+          {task.assignedTo && task.assignedTo.length > 0 && (
+            <div className="flex items-center">
+              <AvatarDisplay 
+                users={task.assignedTo} 
+                maxDisplay={3} 
+                size="sm" 
+                showTooltip={true}
+              />
+            </div>
+          )}
           <span
             className="text-[11px] px-1.5 py-0.5 rounded-[3px] text-white"
             style={{ backgroundColor: priorityColors[task.priority] }}
@@ -154,7 +194,9 @@ export default function TaskCard({
             {priorityLabels[task.priority]}
           </span>
           {task.dueDate && (
-            <span className="text-[11px] text-[#9b9a97]">📅 {task.dueDate}</span>
+            <span className="text-[11px] text-[#9b9a97]" style={{ color: progressColor === "#ef4444" ? "#ef4444" : "" }}>
+              📅 {task.dueDate}
+            </span>
           )}
           <span className="text-[11px]" title={task.isPublic ? t.public : t.private}>
             {task.isPublic ? "🌍" : "🔒"}
