@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useStore } from "../store/useStore";
 import { useTasks } from "../hooks/useTasks";
 import { getTranslation } from "../lib/translations";
@@ -21,8 +21,8 @@ export default function CalendarView() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [enableRangeSelection, setEnableRangeSelection] = useState(false);
   
-  // Get all tasks from store
-  const allTasks = getAllTasks();
+  // Get all tasks from store - memoized to prevent unnecessary re-renders
+  const allTasks = useMemo(() => getAllTasks(), [getAllTasks]);
   
   // Handle single date click
   const handleDateClick = useCallback((date: Date) => {
