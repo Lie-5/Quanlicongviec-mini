@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Task Manager - Quản Lý Công Việc",
-  description: "Modern task management application - Ứng dụng quản lý công việc hiện đại",
+  title: "TaskFlow - Task Management",
+  description: "Modern task management application",
 };
 
 export default function RootLayout({
@@ -26,9 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeInitializer />
         <ToastProvider />
         {children}

@@ -1,174 +1,84 @@
 "use client";
 
-interface SidebarProps {
-  collapsed: boolean;
-  language: "vi" | "en";
-}
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../hooks/useAuth";
 
-export default function Sidebar({ collapsed, language }: SidebarProps) {
-  const t = language === "vi" ? {
-    workspace: "Không gian làm việc",
-    quickFind: "Tìm nhanh",
-    favorites: "Yêu thích",
-    recent: "Gần đây",
-    private: "Riêng tư",
-    newPage: "Trang mới",
-    menuItems: [
-      { icon: "📊", label: "Bảng", active: true },
-      { icon: "📋", label: "Danh sách", active: false },
-      { icon: "📅", label: "Lịch", active: false },
-      { icon: "📈", label: "Dòng thời gian", active: false },
-      { icon: "👥", label: "Nhóm", active: false },
-    ],
-    favoritesItems: [
-      { icon: "📁", label: "Dự án Alpha" },
-      { icon: "📁", label: "Lập kế hoạch Sprint" },
-      { icon: "📁", label: "Biên bản họp" },
-    ],
-    recentItems: [
-      { icon: "📄", label: "Mục tiêu Q1" },
-      { icon: "📄", label: "Theo dõi lỗi" },
-      { icon: "📄", label: "Ghi chú phát hành" },
-    ],
-    myTasks: "Công việc của tôi",
-  } : {
-    workspace: "Workspace",
-    quickFind: "Quick Find",
-    favorites: "Favorites",
-    recent: "Recent",
-    private: "Private",
-    newPage: "New Page",
-    menuItems: [
-      { icon: "📊", label: "Board", active: true },
-      { icon: "📋", label: "List", active: false },
-      { icon: "📅", label: "Calendar", active: false },
-      { icon: "📈", label: "Timeline", active: false },
-      { icon: "👥", label: "Team", active: false },
-    ],
-    favoritesItems: [
-      { icon: "📁", label: "Project Alpha" },
-      { icon: "📁", label: "Sprint Planning" },
-      { icon: "📁", label: "Meeting Notes" },
-    ],
-    recentItems: [
-      { icon: "📄", label: "Q1 Goals" },
-      { icon: "📄", label: "Bug Tracker" },
-      { icon: "📄", label: "Release Notes" },
-    ],
-    myTasks: "My Tasks",
+const menuItems = [
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    path: "/dashboard",
+    icon: "📊",
+  },
+  {
+    id: "tasks",
+    label: "Tasks",
+    path: "/tasks",
+    icon: "✓",
+  },
+  {
+    id: "settings",
+    label: "Settings",
+    path: "/settings",
+    icon: "⚙️",
+  },
+];
+
+export default function Sidebar() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { signOut } = useAuth();
+
+  const handleLogout = () => {
+    signOut();
+    router.push("/login");
   };
 
-  if (collapsed) {
-    return (
-      <aside className="fixed left-0 top-[45px] bottom-0 w-[0px] bg-[#f7f6f3] dark:bg-[#2f2f2f] border-r border-[#e0e0e0] dark:border-[#3f3f3f] overflow-hidden transition-all duration-300">
-      </aside>
-    );
-  }
-
   return (
-    <aside className="fixed left-0 top-[45px] bottom-0 w-[240px] bg-[#f7f6f3] dark:bg-[#2f2f2f] border-r border-[#e0e0e0] dark:border-[#3f3f3f] overflow-y-auto transition-all duration-300">
-      {/* Workspace section */}
-      <div className="p-3">
-        <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-[#efefed] dark:hover:bg-[#3f3f3f] rounded-[4px] cursor-pointer transition-colors">
-          <div className="w-[18px] h-[18px] bg-[#E16737] rounded-[3px] flex items-center justify-center">
-            <span className="text-white text-[10px] font-medium">U</span>
+    <aside className="fixed left-0 top-0 bottom-0 w-64 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-700 z-40 flex flex-col">
+      {/* Logo */}
+      <div className="p-6 border-b border-gray-200 dark:border-slate-700">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-500 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-lg">T</span>
           </div>
-          <span className="text-[14px] font-medium text-[#37352f] dark:text-[#e0e0e0]">{t.workspace}</span>
-          <svg className="ml-auto w-4 h-4 text-[#9b9a97]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="px-3 pb-2">
-        <div className="flex items-center gap-1.5 px-2 py-1">
-          <span className="text-[11px] text-[#9b9a97] font-medium uppercase tracking-wide">{t.quickFind}</span>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">TaskFlow</h1>
         </div>
       </div>
 
       {/* Menu Items */}
-      <div className="px-2 pb-2">
-        {t.menuItems.map((item, index) => (
-          <div 
-            key={index}
-            className={`flex items-center gap-2 px-2 py-1.5 rounded-[4px] cursor-pointer transition-colors ${
-              item.active ? "bg-[#ededec] dark:bg-[#3f3f3f]" : "hover:bg-[#efefed] dark:hover:bg-[#3f3f3f]"
-            }`}
-          >
-            <span>{item.icon}</span>
-            <span className={`text-[14px] ${item.active ? "font-medium" : ""} text-[#37352f] dark:text-[#e0e0e0]`}>
-              {item.label}
-            </span>
-          </div>
-        ))}
-      </div>
+      <nav className="flex-1 px-4 py-6 space-y-2">
+        {menuItems.map((item) => {
+          const isActive = pathname === item.path;
 
-      {/* Favorites */}
-      <div className="px-3 pt-2 pb-1">
-        <div className="flex items-center justify-between px-2 py-1">
-          <span className="text-[11px] text-[#9b9a97] font-medium uppercase tracking-wide">{t.favorites}</span>
-          <button className="text-[#9b9a97] hover:text-[#37352f] dark:hover:text-[#e0e0e0] text-[14px]">+</button>
-        </div>
-      </div>
+          return (
+            <Link
+              key={item.id}
+              href={item.path}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition-all duration-200 ${
+                isActive
+                  ? "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-300 dark:border-yellow-600 text-gray-900 dark:text-yellow-100 scale-105 font-bold"
+                  : "border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800"
+              }`}
+            >
+              <span className="text-xl">{item.icon}</span>
+              <span className="font-semibold">{item.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
 
-      <div className="px-2 pb-2">
-        {t.favoritesItems.map((item, index) => (
-          <div 
-            key={index}
-            className="flex items-center gap-2 px-2 py-1.5 rounded-[4px] cursor-pointer hover:bg-[#efefed] dark:hover:bg-[#3f3f3f] transition-colors"
-          >
-            <span>{item.icon}</span>
-            <span className="text-[14px] text-[#37352f] dark:text-[#e0e0e0]">{item.label}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* Recent */}
-      <div className="px-3 pt-2 pb-1">
-        <div className="flex items-center justify-between px-2 py-1">
-          <span className="text-[11px] text-[#9b9a97] font-medium uppercase tracking-wide">{t.recent}</span>
-          <button className="text-[#9b9a97] hover:text-[#37352f] dark:hover:text-[#e0e0e0] text-[14px]">+</button>
-        </div>
-      </div>
-
-      <div className="px-2 pb-2">
-        {t.recentItems.map((item, index) => (
-          <div 
-            key={index}
-            className="flex items-center gap-2 px-2 py-1.5 rounded-[4px] cursor-pointer hover:bg-[#efefed] dark:hover:bg-[#3f3f3f] transition-colors"
-          >
-            <span>{item.icon}</span>
-            <span className="text-[14px] text-[#37352f] dark:text-[#e0e0e0]">{item.label}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* Private section */}
-      <div className="px-3 pt-4 pb-1">
-        <div className="flex items-center justify-between px-2 py-1">
-          <span className="text-[11px] text-[#9b9a97] font-medium uppercase tracking-wide">{t.private}</span>
-          <button className="text-[#9b9a97] hover:text-[#37352f] dark:hover:text-[#e0e0e0] text-[14px]">+</button>
-        </div>
-      </div>
-
-      <div className="px-2">
-        <div className="flex items-center gap-2 px-2 py-1.5 rounded-[4px] cursor-pointer hover:bg-[#efefed] dark:hover:bg-[#3f3f3f] transition-colors">
-          <span>📄</span>
-          <span className="text-[14px] text-[#37352f] dark:text-[#e0e0e0]">{t.myTasks}</span>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-[#e0e0e0] dark:border-[#3f3f3f] bg-[#f7f6f3] dark:bg-[#2f2f2f]">
-        <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-[#efefed] dark:hover:bg-[#3f3f3f] rounded-[4px] cursor-pointer transition-colors">
-          <svg className="w-4 h-4 text-[#9b9a97]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="12" y1="8" x2="12" y2="16" />
-            <line x1="8" y1="12" x2="16" y2="12" />
-          </svg>
-          <span className="text-[14px] text-[#9b9a97]">{t.newPage}</span>
-        </div>
+      {/* Logout Button */}
+      <div className="p-4 border-t border-gray-200 dark:border-slate-700">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg border-2 border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 font-semibold"
+        >
+          <span className="text-xl">🚪</span>
+          <span>Logout</span>
+        </button>
       </div>
     </aside>
   );

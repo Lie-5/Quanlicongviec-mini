@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useStore } from "../store/useStore";
 import { useAuth } from "../hooks/useAuth";
 import { useTheme } from "../hooks/useTheme";
@@ -16,10 +18,26 @@ const languages: { code: Language; name: string; native: string }[] = [
 ];
 
 export default function SettingsPage() {
+  const router = useRouter();
   const { language, setLanguage, toggleLanguage } = useStore();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
   const t = getTranslation(language);
+
+  // Redirect to login if not authenticated (only on client, only once)
+  useEffect(() => {
+    if (!isAuthenticated && user === null) {
+      router.replace("/login");
+    }
+  }, [isAuthenticated, user, router]);
+
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
 
   const handleLanguageChange = (lang: Language) => {
     if (language !== lang) {
@@ -49,7 +67,7 @@ export default function SettingsPage() {
             ) : (
               <div className="w-[64px] h-[64px] bg-[#E16737] rounded-[8px] flex items-center justify-center">
                 <span className="text-white text-[24px] font-medium">
-                  {user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
+                  {user.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)}
                 </span>
               </div>
             )}

@@ -1,14 +1,31 @@
-import { useEffect } from "react";
+"use client";
+
+import { useEffect, useState } from "react";
 import { useStore } from "../store/useStore";
 import { User } from "../types";
 import toast from "react-hot-toast";
 
 export const useAuth = () => {
-  const { user, setUser, language } = useStore();
-
-  useEffect(() => {
-    // Check for logged in user on mount
+  const { user: storeUser, setUser, language } = useStore();
+  const [isHydrated] = useState(() => {
+    // Initialize state synchronously during construction
     if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("currentUser");
+      if (storedUser && !storeUser) {
+        try {
+          // Set user during initial state creation (no re-render)
+          return JSON.parse(storedUser);
+        } catch (error) {
+          console.error("Failed to parse user data:", error);
+        }
+      }
+    }
+    return null;
+  });
+  
+  // Check for user on mount (only if not already set)
+  useEffect(() => {
+    if (typeof window !== "undefined" && !storeUser) {
       const storedUser = localStorage.getItem("currentUser");
       if (storedUser) {
         try {
@@ -18,7 +35,11 @@ export const useAuth = () => {
         }
       }
     }
-  }, [setUser]);
+  }, [setUser, storeUser]);
+
+  const user = storeUser;
+  const isAuthenticated = !!user;
+  const isLoading = !isHydrated && !storeUser;
 
   const signIn = (email: string, password: string): boolean => {
     if (typeof window === "undefined") return false;
@@ -87,7 +108,7 @@ export const useAuth = () => {
     signUp,
     signOut,
     updateAvatar,
-    isAuthenticated: !!user,
+    isAuthenticated,
+    isLoading,
   };
 };
-
