@@ -24,7 +24,6 @@ export default function SettingsPage() {
   const { isDarkMode, toggleTheme } = useTheme();
   const t = getTranslation(language);
 
-  // Redirect to login if not authenticated (only on client, only once)
   useEffect(() => {
     if (!isAuthenticated && user === null) {
       router.replace("/login");
@@ -47,53 +46,50 @@ export default function SettingsPage() {
 
   return (
     <div className="p-8">
-      <h1 className="text-[28px] font-bold text-[#37352f] dark:text-[#e0e0e0] mb-6">
-        {t.settings}
+      <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
+        {language === "vi" ? "Cài đặt" : "Settings"}
       </h1>
 
-      {/* User Profile Section */}
       {user && (
-        <div className="bg-white dark:bg-[#2f2f2f] rounded-[8px] p-6 border border-[#e0e0e0] dark:border-[#3f3f3f] mb-6">
-          <h2 className="text-[18px] font-bold text-[#37352f] dark:text-[#e0e0e0] mb-4">
-            {t.profile}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border-2 border-gray-200 dark:border-slate-700 p-6 mb-6 shadow-sm">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+            {language === "vi" ? "Hồ sơ người dùng" : "User Profile"}
           </h2>
           <div className="flex items-center gap-4">
             {user.avatar ? (
               <img
                 src={user.avatar}
                 alt={user.name}
-                className="w-[64px] h-[64px] rounded-[8px] object-cover"
+                className="w-16 h-16 rounded-2xl object-cover border-2 border-gray-200 dark:border-slate-600"
               />
             ) : (
-              <div className="w-[64px] h-[64px] bg-[#E16737] rounded-[8px] flex items-center justify-center">
-                <span className="text-white text-[24px] font-medium">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center border-2 border-gray-200 dark:border-slate-600">
+                <span className="text-white text-2xl font-medium">
                   {user.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)}
                 </span>
               </div>
             )}
             <div>
-              <p className="text-[16px] font-medium text-[#37352f] dark:text-[#e0e0e0]">
+              <p className="text-lg font-semibold text-gray-900 dark:text-white">
                 {user.name}
               </p>
-              <p className="text-[14px] text-[#9b9a97]">{user.email}</p>
+              <p className="text-sm text-gray-500 dark:text-slate-400">{user.email}</p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Appearance Settings */}
-      <div className="bg-white dark:bg-[#2f2f2f] rounded-[8px] p-6 border border-[#e0e0e0] dark:border-[#3f3f3f] mb-6">
-        <h2 className="text-[18px] font-bold text-[#37352f] dark:text-[#e0e0e0] mb-4">
-          {t.appearance}
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border-2 border-gray-200 dark:border-slate-700 p-6 mb-6 shadow-sm">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+          {language === "vi" ? "Giao diện" : "Appearance"}
         </h2>
 
-        {/* Theme Toggle */}
-        <div className="flex items-center justify-between py-3 border-b border-[#e0e0e0] dark:border-[#3f3f3f]">
+        <div className="flex items-center justify-between py-4 border-b border-gray-200 dark:border-slate-700">
           <div>
-            <p className="text-[14px] font-medium text-[#37352f] dark:text-[#e0e0e0]">
-              {t.theme}
+            <p className="text-base font-semibold text-gray-900 dark:text-white">
+              {language === "vi" ? "Chủ đề" : "Theme"}
             </p>
-            <p className="text-[13px] text-[#9b9a97]">
+            <p className="text-sm text-gray-500 dark:text-slate-400">
               {language === "vi"
                 ? "Chọn giao diện sáng hoặc tối"
                 : "Choose light or dark theme"}
@@ -101,33 +97,21 @@ export default function SettingsPage() {
           </div>
           <button
             onClick={toggleTheme}
-            className={`relative w-[52px] h-[28px] rounded-full transition-colors ${
-              isDarkMode ? "bg-[#2383E2]" : "bg-[#e0e0e0]"
+            className={`relative w-14 h-8 rounded-full transition-colors border-2 ${
+              isDarkMode ? "bg-purple-600 border-purple-600" : "bg-gray-200 border-gray-300"
             }`}
           >
             <div
-              className={`absolute top-[2px] w-[24px] h-[24px] bg-white rounded-full shadow-sm transition-transform ${
-                isDarkMode ? "translate-x-[26px]" : "translate-x-[2px]"
+              className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow-md transition-transform ${
+                isDarkMode ? "translate-x-6" : "translate-x-1"
               }`}
             >
               {isDarkMode ? (
-                <svg
-                  className="w-full h-full p-1"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#2383E2"
-                  strokeWidth="2"
-                >
+                <svg className="w-full h-full p-1" viewBox="0 0 24 24" fill="none" stroke="#9333ea" strokeWidth="2">
                   <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                 </svg>
               ) : (
-                <svg
-                  className="w-full h-full p-1"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#9b9a97"
-                  strokeWidth="2"
-                >
+                <svg className="w-full h-full p-1" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2">
                   <circle cx="12" cy="12" r="5" />
                   <line x1="12" y1="1" x2="12" y2="3" />
                   <line x1="12" y1="21" x2="12" y2="23" />
@@ -143,55 +127,62 @@ export default function SettingsPage() {
           </button>
         </div>
 
-        {/* Current Theme Display */}
         <div className="mt-4 grid grid-cols-2 gap-4">
           <div
-            className={`p-4 rounded-[6px] border-2 cursor-pointer transition-all ${
+            className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
               !isDarkMode
-                ? "border-[#2383E2] bg-[#f7f6f3]"
-                : "border-[#e0e0e0] dark:border-[#3f3f3f] bg-white"
+                ? "border-purple-500 bg-purple-50 dark:bg-purple-900/20"
+                : "border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700"
             }`}
-            onClick={() => !isDarkMode || toggleTheme()}
+            onClick={() => isDarkMode && toggleTheme()}
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[14px] font-medium text-[#37352f]">{t.lightMode}</span>
-              {!isDarkMode && <span className="text-[#2383E2]">✓</span>}
+              <span className="text-base font-semibold text-gray-900 dark:text-white">
+                {language === "vi" ? "Sáng" : "Light"}
+              </span>
+              {!isDarkMode && (
+                <svg className="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              )}
             </div>
-            <div className="h-[60px] bg-white rounded-[4px] border border-[#e0e0e0]"></div>
+            <div className="h-16 bg-gray-100 dark:bg-slate-600 rounded-lg border border-gray-200 dark:border-slate-500"></div>
           </div>
 
           <div
-            className={`p-4 rounded-[6px] border-2 cursor-pointer transition-all ${
+            className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
               isDarkMode
-                ? "border-[#2383E2] bg-[#2f2f2f]"
-                : "border-[#e0e0e0] bg-white"
+                ? "border-purple-500 bg-purple-50 dark:bg-purple-900/20"
+                : "border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700"
             }`}
-            onClick={() => isDarkMode || toggleTheme()}
+            onClick={() => !isDarkMode && toggleTheme()}
           >
             <div className="flex items-center justify-between mb-2">
-              <span className={`text-[14px] font-medium ${isDarkMode ? "text-[#e0e0e0]" : "text-[#37352f]"}`}>
-                {t.darkMode}
+              <span className="text-base font-semibold text-gray-900 dark:text-white">
+                {language === "vi" ? "Tối" : "Dark"}
               </span>
-              {isDarkMode && <span className="text-[#2383E2]">✓</span>}
+              {isDarkMode && (
+                <svg className="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              )}
             </div>
-            <div className="h-[60px] bg-[#191919] rounded-[4px] border border-[#3f3f3f]"></div>
+            <div className="h-16 bg-slate-800 rounded-lg border border-slate-600"></div>
           </div>
         </div>
       </div>
 
-      {/* Language Settings */}
-      <div className="bg-white dark:bg-[#2f2f2f] rounded-[8px] p-6 border border-[#e0e0e0] dark:border-[#3f3f3f]">
-        <h2 className="text-[18px] font-bold text-[#37352f] dark:text-[#e0e0e0] mb-4">
-          {t.language}
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border-2 border-gray-200 dark:border-slate-700 p-6 shadow-sm">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+          {language === "vi" ? "Ngôn ngữ" : "Language"}
         </h2>
 
-        {/* Language Toggle */}
-        <div className="flex items-center justify-between py-3 border-b border-[#e0e0e0] dark:border-[#3f3f3f]">
+        <div className="flex items-center justify-between py-4 border-b border-gray-200 dark:border-slate-700">
           <div>
-            <p className="text-[14px] font-medium text-[#37352f] dark:text-[#e0e0e0]">
+            <p className="text-base font-semibold text-gray-900 dark:text-white">
               {language === "vi" ? "Ngôn ngữ hiển thị" : "Display Language"}
             </p>
-            <p className="text-[13px] text-[#9b9a97]">
+            <p className="text-sm text-gray-500 dark:text-slate-400">
               {language === "vi"
                 ? "Chọn ngôn ngữ cho giao diện"
                 : "Choose interface language"}
@@ -199,32 +190,35 @@ export default function SettingsPage() {
           </div>
           <button
             onClick={toggleLanguage}
-            className="px-4 py-2 bg-[#2383E2] text-white rounded-[4px] hover:bg-[#1a6fc4] transition-colors text-[14px] font-medium"
+            className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-xl border-2 border-purple-500 hover:border-purple-600 transition-all duration-200 font-semibold text-sm"
           >
-            {language === "vi" ? "Switch to English" : language === "en" ? "Chuyển sang Tiếng Việt" : "Next Language"}
+            {language === "vi" ? "Chuyển sang English" : language === "en" ? "Chuyển sang Tiếng Việt" : "Next Language"}
           </button>
         </div>
 
-        {/* Language Options */}
         <div className="mt-4 grid grid-cols-2 gap-4">
           {languages.map((lang) => (
             <div
               key={lang.code}
-              className={`p-4 rounded-[6px] border-2 cursor-pointer transition-all ${
+              className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
                 language === lang.code
-                  ? "border-[#2383E2] bg-[#f7f6f3] dark:bg-[#3f3f3f]"
-                  : "border-[#e0e0e0] dark:border-[#3f3f3f] bg-white dark:bg-[#2f2f2f]"
+                  ? "border-purple-500 bg-purple-50 dark:bg-purple-900/20"
+                  : "border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 hover:border-gray-300 dark:hover:border-slate-500"
               }`}
               onClick={() => language !== lang.code && handleLanguageChange(lang.code)}
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[14px] font-medium text-[#37352f] dark:text-[#e0e0e0]">
+                  <p className="text-base font-semibold text-gray-900 dark:text-white">
                     {lang.native}
                   </p>
-                  <p className="text-[12px] text-[#9b9a97]">{lang.name}</p>
+                  <p className="text-sm text-gray-500 dark:text-slate-400">{lang.name}</p>
                 </div>
-                {language === lang.code && <span className="text-[#2383E2]">✓</span>}
+                {language === lang.code && (
+                  <svg className="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                )}
               </div>
             </div>
           ))}

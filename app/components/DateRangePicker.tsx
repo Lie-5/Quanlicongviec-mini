@@ -118,15 +118,6 @@ export default function DateRangePicker({
     return d >= s && d <= e;
   };
 
-  // Check if date is start or end of range
-  const isRangeStart = (date: Date, start: Date | null) => {
-    return startDate && isSameDay(date, startDate);
-  };
-
-  const isRangeEnd = (date: Date) => {
-    return endDate && isSameDay(date, endDate);
-  };
-
   // Handle date click
   const handleDateClick = (date: Date) => {
     if (minDate && date < minDate) return;
@@ -163,12 +154,12 @@ export default function DateRangePicker({
   };
 
   // Clear selection
-  const clearSelection = () => {
+  const clearSelection = useCallback(() => {
     setIsSelecting(false);
     setSelectionStart(null);
     setHoveredRange(null);
     onRangeChange(null, null);
-  };
+  }, [onRangeChange]);
 
   // Navigation
   const prevMonth = () => {
@@ -186,13 +177,13 @@ export default function DateRangePicker({
   // Keyboard support
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isSelecting) {
+      if ((e.key === "Escape" || e.key === "Esc") && isSelecting) {
         clearSelection();
       }
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isSelecting]);
+  }, [isSelecting, clearSelection]);
 
   const weekdays = getWeekdays();
   const calendarDays = getCalendarDays();
@@ -272,7 +263,6 @@ export default function DateRangePicker({
         }}
       >
         {calendarDays.map((day, index) => {
-          const dateStr = day.date.toISOString().split("T")[0];
           const isTodayDate = isSameDay(day.date, today);
           
           // Determine if this date is in the selection range

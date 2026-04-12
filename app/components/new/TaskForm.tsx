@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Task } from "../../types";
+import { Task, Priority, TaskStatus } from "../../types";
 import toast from "react-hot-toast";
 
 interface TaskFormProps {
@@ -110,7 +110,7 @@ export default function TaskForm({ task, onSave, onCancel, language = "en" }: Ta
             </label>
             <select
               value={formData.priority}
-              onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, priority: e.target.value as Priority })}
               className="w-full px-4 py-2 rounded-lg border-2 border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none transition-colors"
             >
               <option value="low">{language === "vi" ? "Thấp" : "Low"}</option>
@@ -126,7 +126,7 @@ export default function TaskForm({ task, onSave, onCancel, language = "en" }: Ta
             </label>
             <select
               value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value as TaskStatus })}
               className="w-full px-4 py-2 rounded-lg border-2 border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none transition-colors"
             >
               <option value="todo">{language === "vi" ? "Cần làm" : "To Do"}</option>

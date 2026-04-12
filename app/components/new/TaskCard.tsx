@@ -4,11 +4,15 @@ import { Task } from "../../types";
 
 interface TaskCardProps {
   task: Task;
-  onEdit: (task: Task) => void;
-  onDelete: (taskId: string) => void;
+  onEdit?: (task: Task) => void;
+  onDelete?: (taskId: string) => void;
+  language?: string;
+  onToggleFavorite?: (taskId: string) => void;
 }
 
 export default function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
+  const handleEdit = onEdit || (() => {});
+  const handleDelete = onDelete || (() => {});
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "high":
@@ -45,7 +49,7 @@ export default function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
           )}
         </div>
         <button
-          onClick={() => onDelete(task.id)}
+          onClick={() => handleDelete(task.id)}
           className="ml-2 p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-900/50 transition-all duration-200"
           aria-label="Delete task"
         >
@@ -82,7 +86,7 @@ export default function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
       </div>
 
       <button
-        onClick={() => onEdit(task)}
+        onClick={() => handleEdit(task)}
         className="w-full px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-semibold rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-all duration-200 border border-blue-200 dark:border-blue-600"
       >
         Edit Task

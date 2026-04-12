@@ -2,7 +2,7 @@
 
 import Sidebar from "../components/Sidebar";
 
-export default function DashboardLayout({
+export default function OverviewLayout({
   children,
 }: {
   children: React.ReactNode;

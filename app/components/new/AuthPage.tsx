@@ -42,7 +42,7 @@ export default function AuthPage({ language = "en" }: AuthPageProps) {
       if (activeTab === "login") {
         const success = signIn(formData.email, formData.password);
         if (success) {
-          router.push("/tasks");
+          router.push("/overview");
         }
       } else {
         if (!formData.name.trim()) {
@@ -52,7 +52,7 @@ export default function AuthPage({ language = "en" }: AuthPageProps) {
         }
         const success = signUp(formData.name, formData.email, formData.password);
         if (success) {
-          router.push("/tasks");
+          router.push("/overview");
         }
       }
     } catch (err) {

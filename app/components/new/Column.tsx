@@ -60,9 +60,9 @@ export default function Column({
             key={task.id}
             task={task}
             language={language}
-            onEdit={onEditTask}
-            onDelete={onDeleteTask}
-            onToggleFavorite={onToggleFavorite}
+            onEdit={onEditTask || (() => {})}
+            onDelete={onDeleteTask || (() => {})}
+            onToggleFavorite={onToggleFavorite || (() => {})}
           />
         ))}
         
