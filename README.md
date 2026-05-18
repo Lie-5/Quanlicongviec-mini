@@ -71,7 +71,7 @@ public/
 Clone source code:
 
 ```bash
-git clone LINK_GITHUB_CUA_BAN
+git clone https://github.com/Lie-5/Quanlicongviec-mini.git
 ```
 
 Cài đặt thư viện:
